@@ -1,15 +1,16 @@
 package br.com.screenMatchWSpring.main;
 
+import br.com.screenMatchWSpring.model.Episode;
 import br.com.screenMatchWSpring.model.EpisodeData;
 import br.com.screenMatchWSpring.model.SerieData;
 import br.com.screenMatchWSpring.model.SeasonData;
 import br.com.screenMatchWSpring.service.ApiUsage;
 import br.com.screenMatchWSpring.service.ConvertData;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
     private Scanner scanner = new Scanner(System.in);
@@ -37,6 +38,40 @@ public class Main {
 
         seasons.forEach(t -> t.episodes().forEach(e -> System.out.println(e.title())));
 
+        List<EpisodeData> episodeData = seasons.stream()
+                .flatMap(t -> t.episodes().stream())
+                .toList();
+
+        System.out.println("\nTop 5 episodes:");
+
+        episodeData.stream()
+                .filter(e -> !e.imdbRating().equalsIgnoreCase("N/A"))
+                .sorted(Comparator.comparing(EpisodeData::imdbRating).reversed())
+                .limit(5)
+                .forEach(System.out::println);
+
+        List<Episode> episodes = seasons.stream()
+                .flatMap(t -> t.episodes().stream()
+                        .map(d -> new Episode(t.season(), d))
+                ).toList();
+
+        episodes.forEach(System.out::println);
+
+        System.out.println("From what year do you want to see the episodes?");
+        var year = scanner.nextInt();
+        scanner.nextLine();
+
+        LocalDate searchDate = LocalDate.of(year, 1, 1);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        episodes.stream()
+                .filter(e -> e.getReleasedData() != null && e.getReleasedData().isAfter(searchDate))
+                .forEach(e -> System.out.println(
+                        "Season: " + e.getSeason() +
+                                " Episode: " + e.getTitle() +
+                                " Released data: " + e.getReleasedData().format(formatter)
+                ));
 
     }
 }
