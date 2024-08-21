@@ -1,8 +1,6 @@
 package br.com.screenMatchWSpring;
 
-import br.com.screenMatchWSpring.model.SerieData;
-import br.com.screenMatchWSpring.service.ApiUsage;
-import br.com.screenMatchWSpring.service.ConvertData;
+import br.com.screenMatchWSpring.main.Main;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,14 +14,7 @@ public class ScreenMatchWSpringApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		var apiUsage = new ApiUsage();
-		var json = apiUsage.getData("https://www.omdbapi.com/?t=gilmore+girls&apikey=e74a392d");
-//		System.out.println(json);
-//		json = apiUsage.getData("https://coffee.alexflipnote.dev/random.json");
-		System.out.println(json);
-		ConvertData converter = new ConvertData();
-		SerieData data = converter.getData(json, SerieData.class);
-		System.out.println(data);
-
+		Main main = new Main();
+		main.showMenu();
 	}
 }
