@@ -42,13 +42,18 @@ public class Main {
                 .flatMap(t -> t.episodes().stream())
                 .toList();
 
-        System.out.println("\nTop 5 episodes:");
-
-        episodeData.stream()
-                .filter(e -> !e.imdbRating().equalsIgnoreCase("N/A"))
-                .sorted(Comparator.comparing(EpisodeData::imdbRating).reversed())
-                .limit(5)
-                .forEach(System.out::println);
+//        System.out.println("\nTop 10 episodes:");
+//
+//        episodeData.stream()
+//                .filter(e -> !e.imdbRating().equalsIgnoreCase("N/A"))
+//                .peek(e -> System.out.println("First filter(N/A) " + e))
+//                .sorted(Comparator.comparing(EpisodeData::imdbRating).reversed())
+//                .peek(e -> System.out.println("Sort " + e))
+//                .limit(10)
+//                .peek(e -> System.out.println("Limit " + e))
+//                .map(e -> e.title().toUpperCase())
+//                .peek(e -> System.out.println("Mapping " + e))
+//                .forEach(System.out::println);
 
         List<Episode> episodes = seasons.stream()
                 .flatMap(t -> t.episodes().stream()
@@ -57,21 +62,49 @@ public class Main {
 
         episodes.forEach(System.out::println);
 
-        System.out.println("From what year do you want to see the episodes?");
-        var year = scanner.nextInt();
-        scanner.nextLine();
+//        System.out.println("Type an exceprt of the episode name to search");
+//        var excerptTitle = scanner.nextLine();
+//
+//        Optional<Episode> episodeSearched = episodes.stream()
+//                .filter(e -> e.getTitle().toUpperCase().contains(excerptTitle.toUpperCase()))
+//                .findFirst();
+//        if(episodeSearched.isPresent()) {
+//            System.out.println("Episode found!");
+//            System.out.println("Season: " + episodeSearched.get().getSeason());
+//        } else {
+//            System.out.println("Episode not found!");
+//        }
 
-        LocalDate searchDate = LocalDate.of(year, 1, 1);
+//
+//        System.out.println("From what year do you want to see the episodes?");
+//        var year = scanner.nextInt();
+//        scanner.nextLine();
+//
+//        LocalDate searchDate = LocalDate.of(year, 1, 1);
+//
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+//
+//        episodes.stream()
+//                .filter(e -> e.getReleasedData() != null && e.getReleasedData().isAfter(searchDate))
+//                .forEach(e -> System.out.println(
+//                        "Season: " + e.getSeason() +
+//                                " Episode: " + e.getTitle() +
+//                                " Released data: " + e.getReleasedData().format(formatter)
+//                ));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        Map<Integer, Double> ratingsPerSeason = episodes.stream()
+                .filter(e -> e.getImdbRating() > 0.0)
+                .collect(Collectors.groupingBy(Episode::getSeason,
+                        Collectors.averagingDouble(Episode::getImdbRating)));
+        System.out.println(ratingsPerSeason);
 
-        episodes.stream()
-                .filter(e -> e.getReleasedData() != null && e.getReleasedData().isAfter(searchDate))
-                .forEach(e -> System.out.println(
-                        "Season: " + e.getSeason() +
-                                " Episode: " + e.getTitle() +
-                                " Released data: " + e.getReleasedData().format(formatter)
-                ));
+        DoubleSummaryStatistics statistics = episodes.stream()
+                .filter(e -> e.getImdbRating() > 0.0)
+                .collect(Collectors.summarizingDouble(Episode::getImdbRating));
+        System.out.println("Average rating of the series: " + statistics.getAverage());
+        System.out.println("Rating of the best episode: " + statistics.getMax());
+        System.out.println("Rating of the worst episode: " + statistics.getMin());
+        System.out.println("Amount of episodes: " + statistics.getCount());
 
     }
 }
